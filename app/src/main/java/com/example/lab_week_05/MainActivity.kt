@@ -12,12 +12,15 @@ import android.util.Log
 import android.widget.ImageView
 import com.example.lab_week_05.api.CatApiService
 import com.example.lab_week_05.model.ImageData
+import com.example.lab_week_05.model.CatBreedData
 import com.example.lab_week_05.GlideLoader
 import com.example.lab_week_05.ImageLoader
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.converter.moshi.MoshiConverterFactory
+import kotlin.text.firstOrNull
+import kotlin.text.isNotBlank
 
 class MainActivity : AppCompatActivity() {
 
@@ -60,14 +63,17 @@ class MainActivity : AppCompatActivity() {
                                     response: Response<List<ImageData>>) {
                 if(response.isSuccessful){
                     val image = response.body()
-                    val firstImage = image?.firstOrNull()?.imageUrl.orEmpty()
-                    if (firstImage.isNotBlank()) {
-                        imageLoader.loadImage(firstImage, imageResultView)
+                    val firstImage = image?.firstOrNull()
+                    val firstImageBreed = firstImage?.breeds?.firstOrNull()?.name.orEmpty()
+                    if (firstImage != null) {
+                        imageLoader.loadImage(firstImage.imageUrl, imageResultView)
+                        apiResponseView.text = if (firstImageBreed.isNotBlank()) "Cat Breed : " + firstImageBreed else " Cat Breed : Unknown"
                     } else {
                         Log.d(MAIN_ACTIVITY, "Missing image URL")
+                        apiResponseView.text = "Unknown"
                     }
-                    apiResponseView.text = getString(R.string.image_placeholder,
-                        firstImage)
+
+
                 }
                 else{
                     Log.e(MAIN_ACTIVITY, "Failed to get response\n" +
